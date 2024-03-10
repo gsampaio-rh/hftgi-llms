@@ -23,11 +23,11 @@ spec:
       containers:
         - resources:
             limits:
-              cpu: "8"
-              memory: 24Gi
+              cpu: "4"
+              memory: 8Gi
               nvidia.com/gpu: "1"
             requests:
-              cpu: "6"
+              cpu: "2"
           readinessProbe:
             httpGet:
               path: /health

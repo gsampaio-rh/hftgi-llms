@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     path: ui/overlays/
-    repoURL: https://github.com/rcarrat-AI/hftgi-llms.git
+    repoURL: https://github.com/gsampaio-rh/hftgi-llms
     targetRevision: main
   syncPolicy:
     automated:

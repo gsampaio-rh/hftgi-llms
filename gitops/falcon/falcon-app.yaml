@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     path: hg-tgi/overlays/falcon
-    repoURL: https://github.com/rcarrat-AI/hftgi-llms.git
+    repoURL: https://github.com/gsampaio-rh/hftgi-llms.git
     targetRevision: main
   syncPolicy:
     automated:
