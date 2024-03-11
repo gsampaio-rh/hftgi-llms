@@ -2,7 +2,7 @@
 from langchain.llms import HuggingFaceTextGenInference
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-inference_server_url = "http://hf-tgi.llm-hosting.svc.cluster.local:3000/"
+inference_server_url = "http://hf-tgi-server.llms.svc.cluster.local:3000/"
 
 # Basic llm object definition, no text streaming
 llm = HuggingFaceTextGenInference(
