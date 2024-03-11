@@ -1,2 +1,3 @@
 langchain
 text_generation
+sentence-transformers==2.2.2
