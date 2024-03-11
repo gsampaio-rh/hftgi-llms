@@ -14,18 +14,6 @@ def read_conversation_file(file_path):
 
 inference_server_url = "http://hf-tgi-server.llms.svc.cluster.local:3000/"
 
-# template = """<s>[INST] <<SYS>>
-# You are a helpful, respectful and honest assistant.
-# You will be given a question you need to answer, and a context to provide you with information. You must answer the question based as much as possible on this context.
-# Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
-
-# If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
-# <</SYS>>
-
-# Question: {question}
-# Context: {context} [/INST]
-# """
-
 template = """
 <s>[INST] <<SYS>>
 As an assistant, your task is to analyze a WhatsApp conversation and extract essential information in a structured and concise manner. Focus on identifying and summarizing the main points without repetition. The required information includes the respondent's name, contact details (email and phone number), their affiliation or the relevant organization (if mentioned), the specific issue or service they are addressing, the location related to the issue, the main points of their complaint, and their desired outcome.
@@ -63,20 +51,3 @@ file_path = "sample_chat.txt"
 conversation_text = read_conversation_file(file_path)
 
 chain.invoke({"conversation": conversation_text})
-
-# context = ""
-
-# # question = "Can you describe Paris in 200 words?"
-# # chain.invoke({"question": question, "context": context})
-
-# # Interactive questions and answers
-# while True:
-#     query = input("\nEnter a query: ")
-#     if query == "exit":
-#         break
-#     # Get the answer from the chain
-#     chain.invoke({"question": query, "context": context})
-
-# # llm_streaming(
-#     "Can you describe Paris in 200 words?", callbacks=[StreamingStdOutCallbackHandler()]
-# )
