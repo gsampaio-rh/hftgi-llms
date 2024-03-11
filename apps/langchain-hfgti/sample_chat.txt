@@ -1,0 +1,31 @@
+WhatsApp Chat
+==============
+
+Entrevistador: Olá, como posso ajudá-lo hoje? Vamos começar com algumas perguntas básicas. Qual é o seu nome?
+Pessoa: Meu nome é Ana Silva.
+
+Entrevistador: Ótimo, Ana Silva! Qual é o seu email?
+Pessoa: Meu email é ana.silva@email.com.
+
+Entrevistador: Perfeito! E qual é o número do seu telefone celular?
+Pessoa: Meu número de telefone celular é (11) 99999-8888.
+
+Entrevistador: Agora, precisamos de algumas informações específicas sobre a manifestação. Qual é o órgão relacionado com a manifestação?
+Pessoa: O órgão relacionado é o Departamento de Trânsito.
+
+Entrevistador: Entendido. E qual é o local relacionado à sua manifestação?
+Pessoa: O local é a Avenida Paulista, número 1000, São Paulo.
+
+Entrevistador: Certo. Qual é o serviço para o qual deve ser lançada a manifestação?
+Pessoa: O serviço é a manutenção de semáforos.
+
+Entrevistador: Ótimo. Sobre o que você gostaria de falar?
+Pessoa: Eu gostaria de falar sobre a demora na manutenção dos semáforos que está causando muitos congestionamentos.
+
+Entrevistador: Entendi. Quem são os envolvidos na sua manifestação?
+Pessoa: Os envolvidos são os moradores da região e os motoristas que passam pela Avenida Paulista diariamente.
+
+Entrevistador: Por último, pode descrever mais detalhes sobre sua manifestação?
+Pessoa: Claro, a manifestação é sobre a urgência na manutenção dos semáforos na Avenida Paulista. Já fazem mais de duas semanas que os semáforos estão intermitentes ou desligados em horários de pico, causando grandes congestionamentos e até acidentes. Precisamos de uma ação rápida para resolver essa situação.
+
+Entrevistador: Muito obrigado pelas informações, Ana Silva! Vamos processar sua manifestação e entrar em contato em breve.
