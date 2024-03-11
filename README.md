@@ -110,6 +110,7 @@ You're looking for entries like feature.node.kubernetes.io/pci-10de.present=true
 #### NVIDIA GPU Operator
 
 ##### Installing the NVIDIA GPU Operator Using the Web Console
+
 To install the NVIDIA GPU Operator in your OpenShift Container Platform, follow these steps:
 
 1. From the OpenShift web console's side menu, navigate to **Operators > OperatorHub** and select **All Projects**.
@@ -117,6 +118,7 @@ To install the NVIDIA GPU Operator in your OpenShift Container Platform, follow 
 3. Select the **NVIDIA GPU Operator** and click **Install**. On the subsequent screen, click **Install** again.
 
 ##### Create the ClusterPolicy Instance
+
 The installation of the NVIDIA GPU Operator introduces a custom resource definition for a ClusterPolicy, which configures the GPU stack, including image names and repository, pod restrictions/credentials, and more.
 
 **Note**: Creating a ClusterPolicy with an empty specification, such as `spec: {}`, will cause the deployment to fail.
@@ -124,6 +126,7 @@ The installation of the NVIDIA GPU Operator introduces a custom resource definit
 As a cluster administrator, you can create a ClusterPolicy using either the OpenShift Container Platform CLI or the web console. The steps differ when using NVIDIA vGPU; refer to the appropriate sections for details.
 
 ###### Create the Cluster Policy Using the Web Console
+
 1. In the OpenShift Container Platform web console, from the side menu, select **Operators > Installed Operators** and click **NVIDIA GPU Operator**.
 2. Select the **ClusterPolicy** tab, then click **Create ClusterPolicy**. The platform assigns the default name `gpu-cluster-policy`.
 
@@ -136,6 +139,7 @@ After creating the ClusterPolicy, the GPU Operator will install all necessary co
 The status of the newly deployed ClusterPolicy `gpu-cluster-policy` for the NVIDIA GPU Operator changes to `State: ready` upon successful installation.
 
 ##### Verify the Successful Installation of the NVIDIA GPU Operator
+
 To confirm that the NVIDIA GPU Operator has been installed successfully, use the following command to view the new pods and daemonsets:
 
 ```sh
@@ -183,6 +187,43 @@ Once ArgoCD is accessible, you can begin configuring it to manage deployments wi
 3. **Monitor and Manage Deployments**: Use the ArgoCD dashboard to monitor deployments, manually trigger syncs, and rollback changes if necessary.
 
 **Note**: The OpenShift GitOps Operator and ArgoCD leverage Kubernetes RBAC and OpenShift's SSO capabilities, allowing for detailed access control and auditing of your deployment workflows.
+
+### Configuring Security Policies
+
+For certain workloads or services in OpenShift, you may need to grant specific Security Context Constraints (SCCs) to service accounts to ensure they have the necessary permissions to run correctly. Below are commands to add various SCCs to the `default` service account in the `llms` namespace, which can be adjusted according to your specific requirements.
+
+**Execute the following commands to apply the necessary SCCs:**
+
+```sh
+# Create the 'llms' namespace
+oc create namespace llms
+
+# Grant the 'anyuid' SCC to the 'default' service account
+oc adm policy add-scc-to-user anyuid -z default --namespace llms
+
+# Grant the 'nonroot' SCC to the 'default' service account
+oc adm policy add-scc-to-user nonroot -z default --namespace llms
+
+# Grant the 'hostmount-anyuid' SCC to the 'default' service account
+oc adm policy add-scc-to-user hostmount-anyuid -z default --namespace llms
+
+# Grant the 'machine-api-termination-handler' SCC to the 'default' service account
+oc adm policy add-scc-to-user machine-api-termination-handler -z default --namespace llms
+
+# Grant the 'hostnetwork' SCC to the 'default' service account
+oc adm policy add-scc-to-user hostnetwork -z default --namespace llms
+
+# Grant the 'hostaccess' SCC to the 'default' service account
+oc adm policy add-scc-to-user hostaccess -z default --namespace llms
+
+# Grant the 'node-exporter' SCC to the 'default' service account
+oc adm policy add-scc-to-user node-exporter -z default --namespace llms
+
+# Grant the 'privileged' SCC to the 'default' service account
+oc adm policy add-scc-to-user privileged -z default --namespace llms
+```
+
+These commands facilitate the application's operation by ensuring that the default service account within your namespace has the permissions necessary to perform its operations. Modify the namespace and service account names as needed for your specific deployment scenario.
 
 ## Models available to deploy using GitOps
 
