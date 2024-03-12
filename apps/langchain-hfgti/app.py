@@ -46,7 +46,6 @@ def read_conversation_file(file_path):
         txt = file.read()
     return txt
 
-
 def convert_to_json(output):
     # Extract the 'text' field which contains the structured information
     structured_text = output.get("text", "")
@@ -104,7 +103,24 @@ template = """
         Note: Ensure your response is concise, avoiding repetition. If similar points are made more than once, summarize them in a single statement, focusing on providing a clear and structured summary of the conversation's key details.
         """
 
+sentiment_prompt_template = """
+        Given the text below, perform a sentiment analysis to classify the overall sentiment as either "Positive", "Negative", or "Neutral". The sentiment analysis should consider the tone, key phrases, and any explicit or implicit expressions of emotion in the text. 
+
+        After analyzing the sentiment, extract key information in a structured and concise manner if applicable. This includes personal names, email addresses, phone numbers, and any specific concerns or requests mentioned. The goal is to not only classify the sentiment of the text but also to parse out identifiable details that provide context to that sentiment.
+
+        The response should only include:
+
+        - **Sentiment**: The overall sentiment of the text, classified as "Positive", "Negative", or "Neutral".
+        
+        Text for Sentiment Analysis:
+        {text}
+
+        Ensure the response adheres to privacy and ethical guidelines, simplifying the information while preserving its original context and meaning. Avoid making assumptions beyond the provided data. Focus on providing a clear and structured summary of the text's sentiment and any key details.
+        """
+
 QA_CHAIN_PROMPT = PromptTemplate.from_template(template)
+
+SENTIMENT_CHAIN_PROMPT = PromptTemplate.from_template(sentiment_prompt_template)
 
 embeddings = HuggingFaceEmbeddings()
 
@@ -119,9 +135,11 @@ llm = HuggingFaceTextGenInference(
     repetition_penalty=1.175,
 )
 
-chain = QA_CHAIN_PROMPT | llm
+# chain = QA_CHAIN_PROMPT | llm
 
 llm_chain = LLMChain(prompt=QA_CHAIN_PROMPT, llm=llm)
+
+llm_sentiment_chain = LLMChain(prompt=SENTIMENT_CHAIN_PROMPT, llm=llm)
 
 # file_path = "sample_chat.txt"
 # conversation_text = read_conversation_file(file_path)
@@ -150,6 +168,15 @@ for message in consumer:
 
         # Convert the json_response string back to a dictionary for inclusion
         json_response_dict = json.loads(json_response)
+
+        # Extract the "issue" field from the dictionary
+        issue_text = json_response_dict.get('json_response', {}).get('issue', '')
+
+        # Now, use 'issue_text' as input for the sentiment analysis chain
+        sentiment_result = llm_sentiment_chain.invoke({"text": issue_text})
+        
+        # Add the sentiment analysis result to the dictionary
+        json_response_dict['sentiment_analysis'] = sentiment_result
 
         # Prepare the result dictionary with the conversation ID, the conversation text,
         # and the structured JSON response
