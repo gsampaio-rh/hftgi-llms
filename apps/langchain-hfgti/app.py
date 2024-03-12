@@ -3,10 +3,23 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.vectorstores.pgvector import PGVector
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFaceTextGenInference
+from langchain_community.llms import HuggingFaceEndpoint
+from langchain.chains import LLMChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.prompts import PromptTemplate
 from kafka import KafkaConsumer, KafkaProducer
 import json
+import logging
+import uuid
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# Inference Server Setup
+# inference_server_url = "http://hf-tgi-server.llms.svc.cluster.local:3000/"
+inference_server_url = "http://localhost:3000/"
 
 # Kafka setup
 kafka_server = "localhost:9092"  # Change this to your Kafka server address
@@ -33,23 +46,63 @@ def read_conversation_file(file_path):
         txt = file.read()
     return txt
 
-# inference_server_url = "http://hf-tgi-server.llms.svc.cluster.local:3000/"
 
-inference_server_url = "http://localhost:3000/"
+def convert_to_json(output):
+    # Extract the 'text' field which contains the structured information
+    structured_text = output.get("text", "")
+
+    # Define the keys we expect to find in the structured text
+    keys = [
+        "Name",
+        "Email",
+        "Phone Number",
+        "Department",
+        "Issue",
+        "Service",
+        "Additional Information",
+        "Outcomes",
+    ]
+
+    # Initialize an empty dictionary to hold our extracted data
+    data_dict = {}
+
+    # Split the structured text by lines, then iterate over each line
+    for line in structured_text.split("\n"):
+        # For each line, check if it contains one of the keys
+        for key in keys:
+            if line.strip().startswith(f"- **{key}**"):
+                # Extract the value by removing the key part from the line
+                value = line.split(f"- **{key}**:")[1].strip()
+                # Handle special case for "Not available" or similar phrases
+                if value.lower() in ["not available", "não disponível"]:
+                    value = None
+                # Add the key-value pair to our dictionary
+                data_dict[key.replace(" ", "_").lower()] = value
+
+    # Convert the dictionary to a JSON string
+    json_output = json.dumps(data_dict, indent=4, ensure_ascii=False)
+    return json_output
 
 template = """
-<s>[INST] <<SYS>>
-As an assistant, your task is to analyze a WhatsApp conversation and extract essential information in a structured and concise manner. Focus on identifying and summarizing the main points without repetition. The required information includes the respondent's name, contact details (email and phone number), their affiliation or the relevant organization (if mentioned), the specific issue or service they are addressing, the location related to the issue, the main points of their complaint, and their desired outcome.
+        Given the conversation below, extract key information in a structured and concise manner. The goal is to parse out identifiable details such as personal names, email addresses, phone numbers, and any specific concerns or requests mentioned. This extraction should culminate in a structured JSON output that includes the following fields:
 
-You should structure your response by clearly labeling each piece of information and ensuring that there is no repetition. If similar points are made more than once in the conversation, summarize them in a single statement. Your goal is to provide a clear and concise summary of the conversation's key details.
+        - **Name**: The name(s) of the person(s) involved.
+        - **Email**: Email address(es) mentioned.
+        - **Phone Number**: Phone number(s) provided.
+        - **Location**: Any specific locations mentioned in relation to the issue or service.
+        - **Department**: The department or organization related if specified.
+        - **Issue**: Brief description of the main issue(s) discussed.
+        - **Service**: Specific service(s) mentioned in connection with the issue.
+        - **Additional Information**: Any other relevant details or stakeholders mentioned.
+        - **Detailed Description**: A comprehensive summary of the complaint or request, including any specific outcomes desired.
 
-Based on the following conversation, please extract and summarize the necessary information:
+        The response should adhere to privacy and ethical guidelines, simplifying the information while preserving its original context and meaning. Assumptions beyond the provided data should be avoided.
 
-{conversation}
+        Conversation Transcript:
+        {conversation}
 
-Your response should respect privacy, accuracy, and ethical guidelines. Simplify the information while maintaining its original meaning and context. Avoid making assumptions beyond the data provided.
-<</SYS>>[/INST]
-"""
+        Note: Ensure your response is concise, avoiding repetition. If similar points are made more than once, summarize them in a single statement, focusing on providing a clear and structured summary of the conversation's key details.
+        """
 
 QA_CHAIN_PROMPT = PromptTemplate.from_template(template)
 
@@ -68,11 +121,11 @@ llm = HuggingFaceTextGenInference(
 
 chain = QA_CHAIN_PROMPT | llm
 
+llm_chain = LLMChain(prompt=QA_CHAIN_PROMPT, llm=llm)
+
 # file_path = "sample_chat.txt"
 # conversation_text = read_conversation_file(file_path)
-
 # answer = chain.invoke({"conversation": conversation_text})
-
 # print(answer)
 
 for message in consumer:
@@ -81,19 +134,40 @@ for message in consumer:
         conversation_data = json.loads(message.value.decode('utf-8'))
         conversation_text = conversation_data['conversation']
 
-        print("CHAT: ->", conversation_text)
+        # Generate a unique ID for the conversation
+        conversation_id = str(uuid.uuid4())
+
+        logging.info(f"Conversation ID: {conversation_id}")
+        logging.info(f"CHAT: -> {conversation_text}")
 
         # Process the conversation with the chain
-        response = chain.invoke({"conversation": conversation_text})
+        response = llm_chain.invoke({"conversation": conversation_text})
 
-        print("RESPOSTA: ->",response)
+        # logging.info(f"RESPONSE: -> {response}")
 
-        # Prepare the result to be sent to the 'answer' topic
-        result = {"conversation": conversation_text, "response": response}
+        # Convert the structured response to JSON
+        json_response = convert_to_json(response)
+
+        # Convert the json_response string back to a dictionary for inclusion
+        json_response_dict = json.loads(json_response)
+
+        # Prepare the result dictionary with the conversation ID, the conversation text,
+        # and the structured JSON response
+        result = {
+            "id": conversation_id,
+            "conversation": conversation_text,
+            "json_response": json_response_dict
+        }
+
+        # Serialize the 'result' dictionary to a JSON-formatted string
+        result_json = json.dumps(result, indent=4, ensure_ascii=False)
+
+        # Log the JSON-formatted string of 'result'
+        logging.info(f"Result JSON: -> {result_json}")
 
         # Send the processed result to the Kafka 'answer' topic
-        producer.send(producer_topic, value=result)
-        print("Processed and sent conversation to 'answer' topic.")
+        producer.send(producer_topic, value=result_json)
+        logging.info("Processed and sent conversation to 'answer' topic.")
 
     except Exception as e:
-        print(f"Error processing message: {e}")
+        logging.error(f"Error processing message: {e}", exc_info=True)
