@@ -58,7 +58,6 @@
         #messageStream {
             background-color: #ffffff; /* Column background */
             padding: 20px;
-            border-right: 1px solid #e0e0e0; /* Subtle divider */
             min-height: 100vh; /* Adjust the min-height as needed */
             max-height: 100vh; /* Set maximum height to viewport height */
             overflow-y: auto; /* Enable vertical scrolling */
@@ -144,23 +143,73 @@
             animation: flashRed 1s; /* Run animation for 1 second */
         }
 
+        .top-departments {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: auto; /* Adjust height as needed */
+            overflow-y: auto;
+        }
+
+        .top-departments h4 {
+            margin-bottom: 15px;
+        }
+
+        .top-departments li {
+            padding: 5px 0;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .top-departments li:last-child {
+            border-bottom: none;
+        }
+
+        .json-code-block {
+            background-color: #f8f9fa; /* A lighter background for the code block */
+            border: 1px solid #ddd; /* Border to match the message details */
+            border-radius: 5px; /* Rounded corners for the code block */
+            padding: 10px; /* Padding inside the code block */
+            margin-top: 20px; /* Margin above the code block */
+            white-space: pre-wrap; /* Ensures that the JSON is properly formatted */
+            overflow-x: auto; /* Allows scrolling horizontally if the JSON is wide */
+            font-family: monospace; /* Font that gives the appearance of code */
+        }
+
     </style>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-3 column-border d-flex flex-column" id="messageStream">
-                <!-- Messages will be dynamically added here -->
+            <div class="col-md-3 column-border d-flex flex-column">
+                <h4>Stream</h4>
+                <div id="messageStream">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+                
+                <!-- <h4>Chat list</h4> -->
             </div>
             <div class="col-md-6 column-border d-flex flex-column">
                 <!-- Placeholder for the detailed message content -->
+                <h4>Detalhamento</h4>
                 <div id="messageDetails" class="message-details">
                     <!-- Details will be inserted here -->
                 </div>
+                <!-- New div for the JSON code block -->
+                <div id="jsonCodeBlock" class="json-code-block">
+                    <!-- JSON will be inserted here -->
+                </div>
             </div>
             <div class="col-md-3 d-flex flex-column">
-                <!-- Messages will be dynamically added here -->
+                <h4>Top Departments</h4>
+                <div id="topDepartments" class="top-departments">
+                    <ul id="departmentList" class="list-unstyled">
+                        <!-- Department list items will be inserted here -->
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -176,12 +225,18 @@
     </script> -->
     <script>
         const source = new EventSource("/stream");
+
+        // Call this function whenever a new message is received
+        function onNewMessageReceived(message) {
+            displayChatBallon(message.id, message.sentiment_analysis);
+            displayMessageDetails(message);
+            updateTopDepartments(message.department); // Update the departments list
+        }
+
+        // Example usage: This should be inside your EventSource message event listener
         source.onmessage = event => {
             const request = JSON.parse(event.data);
-            console.info(request);
-
-            displayChatBallon(request.id, request.sentiment_analysis)
-            displayMessageDetails(request)
+            onNewMessageReceived(request);
         };
 
         function displayChatBallon(chatID, sentiment) {
@@ -205,17 +260,40 @@
                 <div class="message-detail-item"><strong>👍👎 Sentiment Analysis:</strong> ${message.sentiment_analysis}</div>
             `;
 
-            $('#messageDetails')
-                .html(detailsHtml)
-                // Add either 'flash-positive' or 'flash-negative' based on sentiment
+            // Update the message details as before
+            $('#messageDetails').html(detailsHtml)
                 .addClass(message.sentiment_analysis.includes("Negative") ? 'flash-negative' : 'flash-positive')
                 .on('animationend', function () {
-                    // Remove the class after the animation ends
                     $(this).removeClass('flash-negative flash-positive');
                 });
 
-            // Replace the content of the messageDetails div with the new details
-            $('#messageDetails').html(detailsHtml);
+            // Format the JSON string to display it pretty-printed
+            const jsonPretty = JSON.stringify(message, null, 4); // Indent with 4 spaces
+
+            // Set the JSON to the code block, wrapped in <pre> and <code> for formatting
+            $('#jsonCodeBlock').html(`<pre><code>${jsonPretty}</code></pre>`);
+        }
+
+        // Object to hold department counts
+        const departmentCounts = {};
+
+        function updateTopDepartments(department) {
+            // Increase the count for the department or add it if it doesn't exist
+            if (departmentCounts[department]) {
+                departmentCounts[department]++;
+            } else {
+                departmentCounts[department] = 1;
+            }
+
+            // Sort departments by count
+            const sortedDepartments = Object.entries(departmentCounts).sort((a, b) => b[1] - a[1]);
+
+            // Update the list in the DOM
+            const departmentListHtml = sortedDepartments.map(([dept, count]) =>
+                `<li>${dept}: ${count}</li>`
+            ).join('');
+
+            $('#departmentList').html(departmentListHtml);
         }
 
         // $(document).ready(function () {

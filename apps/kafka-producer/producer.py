@@ -1,8 +1,10 @@
 from kafka import KafkaProducer
 import json
+import os
+import time
 
 # Path to the file containing the chat content
-file_path = "sample_chat.txt"
+folder_path = "conversation_samples"
 
 # Kafka setup
 kafka_server = "localhost:9092"  # Change this to your Kafka server address
@@ -28,5 +30,24 @@ def send_chat_to_kafka(file_path, producer, topic):
 
     print("Chat content sent to Kafka topic.")
 
+# # Execute the function
+# send_chat_to_kafka(file_path, producer, producer_topic)
+
+
+def send_chats_to_kafka(folder_path, producer, topic):
+    while True:
+        # Get list of files in the specified folder
+        file_list = os.listdir(folder_path)
+
+        for file_name in file_list:
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):
+                send_chat_to_kafka(file_path, producer, topic)
+                # Sleep for 15 seconds before the next iteration
+                time.sleep(15)
+                print(
+                    "Iteration over files completed. Waiting for 15 seconds before the next iteration."
+                )
+
 # Execute the function
-send_chat_to_kafka(file_path, producer, producer_topic)
+send_chats_to_kafka(folder_path, producer, producer_topic)
