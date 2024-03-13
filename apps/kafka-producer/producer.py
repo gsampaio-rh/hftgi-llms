@@ -44,7 +44,7 @@ def send_chats_to_kafka(folder_path, producer, topic):
             if os.path.isfile(file_path):
                 send_chat_to_kafka(file_path, producer, topic)
                 # Sleep for 15 seconds before the next iteration
-                time.sleep(15)
+                time.sleep(10)
                 print(
                     "Iteration over files completed. Waiting for 15 seconds before the next iteration."
                 )

@@ -1,0 +1,28 @@
+Entrevistador: Olá, como posso ajudá-lo hoje? Vamos começar com algumas perguntas básicas. Qual é o seu nome?
+Pessoa: Meu nome é {nome}.
+
+Entrevistador: Ótimo, {nome}! Qual é o seu email?
+Pessoa: Meu email é {email}.
+
+Entrevistador: Perfeito! E qual é o número do seu telefone celular?
+Pessoa: Meu número de telefone celular é {telefone}.
+
+Entrevistador: Agora, precisamos de algumas informações específicas sobre a manifestação. Qual é o órgão relacionado com a manifestação?
+Pessoa: O órgão relacionado é {orgao}.
+
+Entrevistador: Entendido. E qual é o local relacionado à sua manifestação?
+Pessoa: O local é {local}.
+
+Entrevistador: Certo. Qual é o serviço para o qual deve ser lançada a manifestação?
+Pessoa: O serviço é {servico}.
+
+Entrevistador: Ótimo. Sobre o que você gostaria de falar?
+Pessoa: Eu gostaria de falar sobre {manifestacao}.
+
+Entrevistador: Entendi. Quem são os envolvidos na sua manifestação?
+Pessoa: Os envolvidos são {envolvidos}.
+
+Entrevistador: Por último, pode descrever mais detalhes sobre sua manifestação?
+Pessoa: Claro, a manifestação é sobre {detalhes}.
+
+Entrevistador: Muito obrigado pelas informações, {nome}! Vamos processar sua manifestação e entrar em contato em breve.

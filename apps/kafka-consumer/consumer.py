@@ -30,9 +30,11 @@ def stream():
                 # Manually deserialize the message value from a JSON string to a dictionary
                 message_dict = json.loads(message.value)
 
+                json_response["conversation"] = message_dict.get("conversation", {})
+
                 # Now you can safely use .get() since message_dict is a dictionary
                 json_response = message_dict.get("json_response", {})
-                
+
                 # Add the 'id' field from the message_dict to the json_response
                 if "id" in message_dict:
                     json_response["id"] = message_dict["id"]
@@ -40,7 +42,7 @@ def stream():
                 # Check if 'sentiment_analysis' exists and replace it with the value at 'sentiment_analysis.text'
                 if "sentiment_analysis" in json_response and "text" in json_response["sentiment_analysis"]:
                     json_response["sentiment_analysis"] = json_response["sentiment_analysis"]["text"]
-            
+
                 # Sending only the json_response part to the client
                 yield f"data: {json.dumps(json_response)}\n\n"
             except json.JSONDecodeError:
@@ -53,6 +55,11 @@ def stream():
 def messages():
     """Renders the initial HTML page."""
     return render_template("messages.html")
+
+@app.route("/nosentiment")
+def nosentiment():
+    """Renders the initial HTML page."""
+    return render_template("no-sentiment.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
