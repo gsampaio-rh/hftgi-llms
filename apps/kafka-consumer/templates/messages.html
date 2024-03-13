@@ -1,57 +1,258 @@
 <!doctype html>
 <html>
-    <head></head>
-    <title>FALA SP</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-        crossorigin="anonymous"></script>
+
+<head>
+    <title>Ouvidoria Demo</title>
+    <link rel="icon" href="data:image/svg+xml,...">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Additional Google Font inclusion if necessary */
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        /* Using a font closer to what Apple might use, such as Helvetica Neue */
+        body, html {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #fafafa; /* Overall background */
+            margin: 0; /* Reset default margin */
+        }
+
+        .container-fluid {
+            padding: 20px; /* Adds space around the content */
+            margin: 20px auto 40px; /* Adds a bottom margin of 40px */
+            border: 1px solid #e0e0e0; /* Thin border for the whole page */
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+            /* Adjust the max-width to better fit the content */
+            max-width: 90%; /* Or you can set a fixed value like '1200px' */
+        }
+
+        /* Additions for a clean line-grid look */
+        .table-responsive {
+            border: 1px solid #e0e0e0; /* Clean table border */
+        }
+
+        .table thead th {
+            background-color: #f0f0f0; /* Slight color for headers */
+            border-bottom: 2px solid #e0e0e0; /* Defined line for header separation */
+        }
+
+        .table tbody tr:nth-of-type(odd) {
+            background-color: #ffffff; /* Alternating row colors for readability */
+        }
+
+        .table tbody tr:nth-of-type(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Row hover effect for interactivity */
+        .table tbody tr:hover {
+            background-color: #eef2f7;
+        }
+
+        .column-border {
+            border-right: 1px solid #e0e0e0;
+        }
+
+        #messageStream {
+            background-color: #ffffff; /* Column background */
+            padding: 20px;
+            border-right: 1px solid #e0e0e0; /* Subtle divider */
+            min-height: 100vh; /* Adjust the min-height as needed */
+            max-height: 100vh; /* Set maximum height to viewport height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .speech-balloon {
+            position: relative;
+            background: #ececec; /* A soft gray background */
+            color: #333; /* Darker text for readability */
+            border-radius: 18px; /* Smooth, rounded corners for the balloon */
+            padding: 15px 20px; /* Adequate padding for content */
+            margin-bottom: 20px; /* Space out balloons */
+            display: block; 
+            clear: both;
+            max-width: 80%;
+            word-wrap: break-word;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Positive and Negative background colors for speech balloons */
+        .speech-balloon.positive {
+            background-color: #e8f5e9; /* Light green for positive sentiment */
+        }
+
+        .speech-balloon.negative {
+            background-color: #ffebee; /* Light red for negative sentiment */
+        }
+
+        .message-details {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .message-details {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-detail-item {
+            padding: 8px 0; /* More padding for each item */
+            border-bottom: 1px solid #e6e6e6; /* Light line for each item */
+        }
+
+        .message-detail-item:last-child {
+            border-bottom: none; /* No border for the last item */
+        }
+
+        .message-detail-item strong {
+            font-weight: 600;
+            margin-right: 5px; /* Space after the emoji */
+            color: #333; /* Dark grey for text */
+        }
+
+        .message-detail-item h4 {
+            margin-bottom: 10px; /* Space below the ID */
+        }
+
+        /* Animation for positive flash */
+        @keyframes flashGreen {
+            from { background-color: #e8f5e9; } /* Light green color */
+            to { background-color: transparent; }
+        }
+
+        .flash-positive {
+            animation: flashGreen 1s; /* Run animation for 1 second */
+        }
+
+        /* Animation for negative flash */
+        @keyframes flashRed {
+            from { background-color: #ffebee; } /* Light red color */
+            to { background-color: transparent; }
+        }
+
+        .flash-negative {
+            animation: flashRed 1s; /* Run animation for 1 second */
+        }
+
+    </style>
 </head>
 
 <body>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle text-center" id="entries">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Department</th>
-                    <th>Issue</th>
-                    <th>Service</th>
-                    <th>Sentiment Analysis</th>
-                </tr>
-            </thead>
-            <tbody>
-            <tbody>
-        </table>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 column-border d-flex flex-column" id="messageStream">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            <div class="col-md-6 column-border d-flex flex-column">
+                <!-- Placeholder for the detailed message content -->
+                <div id="messageDetails" class="message-details">
+                    <!-- Details will be inserted here -->
+                </div>
+            </div>
+            <div class="col-md-3 d-flex flex-column">
+                <!-- Messages will be dynamically added here -->
+            </div>
+        </div>
     </div>
+    <!-- <script>
+        const source = new EventSource("/stream");
+        source.onmessage = event => {
+            const request = JSON.parse(event.data);
+            console.info(request);
+
+            // Add to message stream with speech balloon design
+            $('#messageStream').prepend(`<div class="speech-balloon"><p>${request.id}</p></div>`);
+        };
+    </script> -->
     <script>
         const source = new EventSource("/stream");
-            source.onmessage = event => {
-                const request = JSON.parse(event.data);
-                console.info(request);
-                
-                $('#entries > tbody:first').append(`
-                    <tr>
-                    <td>${request.id}</td>
-                    <td>${request.name}</td>
-                    <td>${request.email}</td>
-                    <td>${request.phone_number}</td>
-                    <td>${request.department}</td>
-                    <td>${request.issue}</td>
-                    <td>${request.service}</td>
-                    <td>${request.sentiment_analysis}</td>
-                    </tr>
-                `);
-            };
+        source.onmessage = event => {
+            const request = JSON.parse(event.data);
+            console.info(request);
+
+            displayChatBallon(request.id, request.sentiment_analysis)
+            displayMessageDetails(request)
+        };
+
+        function displayChatBallon(chatID, sentiment) {
+            const sentimentClass = sentiment.includes("Negative") ? 'negative' : 'positive';
+            $('#messageStream').prepend(`<div class="speech-balloon ${sentimentClass}"><p>💬 ${chatID}</p></div>`);
+        }
+
+        function displayMessageDetails(message) {
+            // Construct the HTML for the message details
+
+            const detailsHtml = `
+                <div class="message-detail-item"><h4>${message.id}</h4></div>
+                <div class="message-detail-item"><strong>🧑‍💼 Name:</strong> ${message.name}</div>
+                <div class="message-detail-item"><strong>📧 Email:</strong> ${message.email}</div>
+                <div class="message-detail-item"><strong>📞 Phone Number:</strong> ${message.phone_number}</div>
+                <div class="message-detail-item"><strong>🏢 Department:</strong> ${message.department}</div>
+                <div class="message-detail-item"><strong>📄 Issue:</strong> ${message.issue}</div>
+                <div class="message-detail-item"><strong>🛠 Service:</strong> ${message.service}</div>
+                <div class="message-detail-item"><strong>ℹ️ Additional Information:</strong> ${message.additional_information}</div>
+                <div class="message-detail-item"><strong>🗒 Detailed Description:</strong> ${message.detailed_description}</div>
+                <div class="message-detail-item"><strong>👍👎 Sentiment Analysis:</strong> ${message.sentiment_analysis}</div>
+            `;
+
+            $('#messageDetails')
+                .html(detailsHtml)
+                // Add either 'flash-positive' or 'flash-negative' based on sentiment
+                .addClass(message.sentiment_analysis.includes("Negative") ? 'flash-negative' : 'flash-positive')
+                .on('animationend', function () {
+                    // Remove the class after the animation ends
+                    $(this).removeClass('flash-negative flash-positive');
+                });
+
+            // Replace the content of the messageDetails div with the new details
+            $('#messageDetails').html(detailsHtml);
+        }
+
+        // $(document).ready(function () {
+
+        //     function generateMockMessage() {
+        //         // Simulate a message with a random ID
+        //         const mockMessage = {
+        //             id: `ID-${Math.floor(Math.random() * 1000)}`
+        //         };
+
+        //         displayChatBallon(mockMessage.id)
+        //     }
+
+        //     // Existing mock message generation code...
+        //     function generateMockMessageDetails() {
+        //         return {
+        //             id: `ID-${Math.floor(Math.random() * 1000)}`,
+        //             name: "Ana Silva",
+        //             email: "ana.silva@email.com",
+        //             phone_number: "(11) 99999-8888",
+        //             department: "Departamento de Trânsito",
+        //             issue: "Manifestação sobre a demora na manutenção de semáforos na Avenida Paulista",
+        //             service: "Manutenção de semáforos",
+        //             additional_information: "Manutenção de semáforos na Avenida Paulista",
+        //             detailed_description: "Manifestação sobre a urgência na manutenção de semáforos na Avenida Paulista, causada por congestionamentos e acidentes.",
+        //             sentiment_analysis: "The sentiment of the text is \"Negative\". This can be inferred from the mention of the \"congestion and accidents\" causing the maintenance of the semaphore, which implies a negative impact on the situation."
+        //         };
+        //     }
+
+        //     // Simulate receiving a new message every 5 seconds and display its details
+        //     setInterval(generateMockMessage, 10000);
+        //     setInterval(function () {
+        //         const newMessage = generateMockMessageDetails(); // Use the mock function to generate a new message
+        //         displayMessageDetails(newMessage);
+        //     }, 10000);
+
+        // });
     </script>
 </body>
 
