@@ -302,6 +302,26 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Conversation Modal -->
+                <div class="modal fade" id="conversationModal" tabindex="-1" role="dialog" aria-labelledby="conversationModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="conversationModalLabel">Conversation Content</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="conversationModalContent"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -320,7 +340,7 @@
 
         // Call this function whenever a new message is received
         function onNewMessageReceived(message) {
-            displayChatBallon(message.id, message.sentiment_analysis);
+            displayChatBallon(message.id, message.sentiment_analysis, message.conversation);
             displayMessageDetails(message);
             updateTopDepartments(message.department); // Update the departments list
         }
@@ -328,12 +348,22 @@
         // Example usage: This should be inside your EventSource message event listener
         source.onmessage = event => {
             const request = JSON.parse(event.data);
+            console.log(request.conversation)
             onNewMessageReceived(request);
         };
 
-        function displayChatBallon(chatID, sentiment) {
+        function displayChatBallon(chatID, sentiment, conversation) {
             const sentimentClass = sentiment.includes("Negative") ? 'negative' : 'positive';
-            $('#messageStream').prepend(`<div class="speech-balloon ${sentimentClass}"><p>💬 ${chatID}</p></div>`);
+            const balloon = $(`<div class="speech-balloon ${sentimentClass}"><p>💬 ${chatID}</p></div>`);
+            balloon.data('conversation', conversation); // Store the conversation in the data attribute
+
+            balloon.on('click', function () {
+                // When a balloon is clicked, display the conversation in a modal
+                $('#conversationModalContent').text($(this).data('conversation'));
+                $('#conversationModal').modal('show');
+            });
+
+            $('#messageStream').prepend(balloon);
         }
 
         function displayMessageDetails(message) {

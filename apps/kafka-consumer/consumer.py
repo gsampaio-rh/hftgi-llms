@@ -30,10 +30,12 @@ def stream():
                 # Manually deserialize the message value from a JSON string to a dictionary
                 message_dict = json.loads(message.value)
 
-                json_response["conversation"] = message_dict.get("conversation", {})
+                # print(message_dict)
 
                 # Now you can safely use .get() since message_dict is a dictionary
                 json_response = message_dict.get("json_response", {})
+
+                json_response["conversation"] = message_dict.get("conversation")
 
                 # Add the 'id' field from the message_dict to the json_response
                 if "id" in message_dict:
