@@ -221,6 +221,9 @@ oc adm policy add-scc-to-user node-exporter -z default --namespace llms
 
 # Grant the 'privileged' SCC to the 'default' service account
 oc adm policy add-scc-to-user privileged -z default --namespace llms
+
+#
+oc adm policy add-role-to-user admin system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller -n llms
 ```
 
 These commands facilitate the application's operation by ensuring that the default service account within your namespace has the permissions necessary to perform its operations. Modify the namespace and service account names as needed for your specific deployment scenario.
